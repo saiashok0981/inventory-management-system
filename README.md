@@ -222,14 +222,6 @@ The system has **3 distinct roles** with increasing levels of authority:
    pip install -r requirements.txt
    ```
 
-3. **Configure database** (Edit `.env`)
-   ```env
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_NAME=drdo_cabs
-   DB_USER=root
-   DB_PASSWORD=your_password
-   ```
 
 4. **Start the HTTPS server**
    ```bash
@@ -348,23 +340,7 @@ GET    /health          - Health check
 
 ## 🛠️ Configuration
 
-### Environment Variables (.env)
-```env
-# Database
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=drdo_cabs
-DB_USER=root
-DB_PASSWORD=
 
-# JWT
-JWT_SECRET_KEY=your-secret-key-change-in-production
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-
-# Server
-HTTPS_PORT=8000
-```
 
 ### Running Without HTTPS (Development)
 ```bash
@@ -447,11 +423,7 @@ For issues, questions, or feature requests:
 
 ---
 
-## 📜 License
 
-Internal DRDO System - Restricted Access
-
----
 
 ## 🎉 Quick Start Commands
 
