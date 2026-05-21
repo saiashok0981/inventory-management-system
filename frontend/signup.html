@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>DRDO CABS Sign Up</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card" style="max-width: 450px; margin: 50px auto;">
+
+        <h1 class="title">DRDO CABS</h1>
+
+        <p style="margin-bottom:20px;">
+            Create Account
+        </p>
+
+        <input type="text" id="username" placeholder="Username">
+
+        <input type="password" id="password" placeholder="Password">
+
+        <input type="password" id="confirm_password" placeholder="Confirm Password">
+
+        <select id="role" style="width: 100%; padding: 10px 12px; margin: 10px 0; border: 1px solid #444; border-radius: 6px; background: #1e1e1e; color: #fff; font-size: 14px; font-family: 'Segoe UI';">
+            <option value="user">User (Add Data Only)</option>
+            <option value="admin">Admin (View Only)</option>
+            <option value="super-admin">Super Admin (Full Access)</option>
+        </select>
+
+        <button onclick="signup()">Sign Up</button>
+
+        <p id="error" style="color:red; margin-top:15px;"></p>
+        <p id="success" style="color:#22c55e; margin-top:15px;"></p>
+
+        <p style="margin-top: 20px; text-align: center;">
+            Already have an account? <a href="/static/index.html" style="color: #38bdf8; text-decoration: none; cursor: pointer;">Login here</a>
+        </p>
+
+    </div>
+
+</div>
+
+<script src="/static/js/signup.js"></script>
+
+</body>
+</html>

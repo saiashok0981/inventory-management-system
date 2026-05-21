@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>DRDO CABS Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <script>
+        function validateAndPreventCache() {
+            const token = localStorage.getItem("token");
+            
+            if (!token) {
+                window.location.href = "/?t=" + Date.now();
+                return false;
+            }
+            
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const currentTime = Math.floor(Date.now() / 1000);
+                if (payload.exp < currentTime) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/?t=" + Date.now();
+                    return false;
+                }
+            } catch (e) {
+                localStorage.removeItem("token");
+                window.location.href = "/?t=" + Date.now();
+                return false;
+            }
+            return true;
+        }
+        
+        if (!validateAndPreventCache()) {
+            document.documentElement.innerHTML = "";
+        }
+    </script>
+</head>
+
+<body>
+
+<div class="navbar">
+    <div class="logo">
+        <div class="logo-circle"></div>
+        <h2>DRDO CABS</h2>
+    </div>
+    <div class="nav-links">
+        <span class="role-badge" id="userRole"></span>
+        <a href="/static/dashboard.html">Dashboard</a>
+        <a href="/static/edit.html">Add Item</a>
+        <a id="deletedLogsLink" href="/static/deleted-logs.html" style="display:none;">Deleted Logs</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="dashboard-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Items</div>
+            <div class="stat-number" id="totalProjects">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">DRONA</div>
+            <div class="stat-number" id="activeProjects">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Internet</div>
+            <div class="stat-number" id="completedProjects">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Stand-alone</div>
+            <div class="stat-number" id="archivedProjects">0</div>
+        </div>
+    </div>
+
+    <div class="card">
+
+        <h1 class="title">Asset Inventory</h1>
+
+        <input
+            type="text"
+            id="searchInput"
+            class="search-bar"
+            placeholder="Search..."
+            onkeyup="filterProjects()"
+        />
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Asset</th>
+                        <th>Serial No</th>
+                        <th>Location</th>
+                        <th>User</th>
+                        <th>Room No</th>
+                        <th>Division</th>
+                        <th>Asset Owner</th>
+                        <th>Model</th>
+                        <th>Network On</th>
+                        <th>Status</th> 
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="projectTable">
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="/static/js/dashboard.js"></script>
+
+</body>
+</html>

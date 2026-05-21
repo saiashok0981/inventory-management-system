@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <title>Audit History</title>
+
+    <link rel="stylesheet"
+          href="/static/css/style.css">
+    
+    <script>
+        function validateAndPreventCache() {
+            const token = localStorage.getItem("token");
+            
+            if (!token) {
+                window.location.href = "/?t=" + Date.now();
+                return false;
+            }
+            
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const currentTime = Math.floor(Date.now() / 1000);
+                if (payload.exp < currentTime) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/?t=" + Date.now();
+                    return false;
+                }
+            } catch (e) {
+                localStorage.removeItem("token");
+                window.location.href = "/?t=" + Date.now();
+                return false;
+            }
+            return true;
+        }
+        
+        if (!validateAndPreventCache()) {
+            document.documentElement.innerHTML = "";
+        }
+    </script>
+</head>
+
+<body>
+
+<div class="navbar">
+
+    <div class="logo">
+        <div class="logo-circle"></div>
+        <h2>DRDO CABS</h2>
+    </div>
+
+    <div class="nav-links">
+
+        <a href="/static/dashboard.html">
+            Dashboard
+        </a>
+
+    </div>
+
+</div>
+
+<div class="container">
+
+    <div class="card">
+
+        <h1 class="title">
+            Audit History
+        </h1>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Field</th>
+                        <th>Old Value</th>
+                        <th>New Value</th>
+                        <th>Changed By</th>
+                        <th>Changed At</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="historyTable">
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="/static/js/history.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>DRDO CABS Login</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card" style="max-width: 450px; margin: 100px auto;">
+
+        <h1 class="title">DRDO CABS</h1>
+
+        <p style="margin-bottom:20px;">
+            Secure Internal Project Management System
+        </p>
+
+        <input type="text" id="username" placeholder="Username">
+
+        <input type="password" id="password" placeholder="Password">
+
+        <button onclick="login()">Login</button>
+
+        <p id="error" style="color:red; margin-top:15px;"></p>
+
+        <p style="margin-top: 20px; text-align: center;">
+            Don't have an account? <a href="/static/signup.html" style="color: #38bdf8; text-decoration: none; cursor: pointer;">Sign up here</a>
+        </p>
+
+    </div>
+
+</div>
+
+<script src="/static/js/auth.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Asset Form</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <script>
+        function validateAndPreventCache() {
+            const token = localStorage.getItem("token");
+            
+            if (!token) {
+                window.location.href = "/?t=" + Date.now();
+                return false;
+            }
+            
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const currentTime = Math.floor(Date.now() / 1000);
+                if (payload.exp < currentTime) {
+                    localStorage.removeItem("token");
+                    window.location.href = "/?t=" + Date.now();
+                    return false;
+                }
+            } catch (e) {
+                localStorage.removeItem("token");
+                window.location.href = "/?t=" + Date.now();
+                return false;
+            }
+            return true;
+        }
+        
+        if (!validateAndPreventCache()) {
+            document.documentElement.innerHTML = "";
+        }
+    </script>
+</head>
+
+<body>
+
+<div class="navbar">
+    <div class="logo">
+        <div class="logo-circle"></div>
+        <h2>DRDO CABS</h2>
+    </div>
+    <div class="nav-links">
+        <a id="dashboardLink" href="/static/dashboard.html">Dashboard</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="card" style="max-width:900px; margin:auto;">
+
+        <h1 class="title" id="pageTitle">Add Asset</h1>
+
+        <label>Asset</label>
+        <select id="asset">
+            <option value="laptop">Laptop</option>
+            <option value="cpu">CPU</option>
+            <option value="router">Router</option>
+            <option value="switch">Switch</option>
+            <option value="monitor">Monitor</option>
+            <option value="firewall">Firewall</option>
+        </select>
+
+        <label>Serial No</label>
+        <input
+            type="text"
+            id="serial_no"
+            placeholder="Enter serial number"
+        >
+
+        <label>Location</label>
+        <input
+            type="text"
+            id="location"
+            placeholder="Enter location"
+        >
+
+        <label>User</label>
+        <input
+            type="text"
+            id="assigned_to"
+            placeholder="Enter assigned user"
+        >
+
+        <label>Room No</label>
+        <input
+            type="text"
+            id="room_no"
+            placeholder="Enter room number"
+        >
+
+        <label>Division</label>
+        <input
+            type="text"
+            id="division"
+            placeholder="Enter division"
+        >
+
+        <label>Asset Owner</label>
+        <input
+            type="text"
+            id="asset_owner"
+            placeholder="Enter asset owner"
+        >
+
+        <label>Model</label>
+        <input
+            type="text"
+            id="model"
+            placeholder="Enter model details"
+        >
+
+        <label>Network On</label>
+        <select id="network_on">
+            <option value="DRONA">DRONA</option>
+            <option value="project">Project</option>
+            <option value="internet">Internet</option>
+            <option value="stand-alone">Stand-alone</option>
+        </select>
+        <label>Status</label>
+        <select id="status">
+            <option value="Inuse">Inuse</option>
+            <option value="put-up for condemnd">Put-up for Condemnd</option>
+            <option value="condemnd">Condemnd</option>
+        </select>
+
+        <button onclick="saveProject()">Save</button>
+
+        <p id="message"></p>
+
+    </div>
+
+</div>
+
+<script src="/static/js/edit.js"></script>
+
+</body>
+</html>
