@@ -156,4 +156,50 @@ async function saveProject() {
     }
 }
 
+async function generateSerialNumber() {
+    const assetType = document.getElementById("asset").value;
+    const serialInput = document.getElementById("serial_no");
+    
+    // Don't auto-generate if we're in edit mode
+    if (isEditMode) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/projects/serial/next/${assetType}`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            serialInput.value = data.serial_no;
+        }
+    } catch (error) {
+        console.error("Error generating serial number:", error);
+    }
+}
+
+async function generateSerialNumber() {
+    const assetType = document.getElementById("asset").value;
+    const serialInput = document.getElementById("serial_no");
+    
+    // Don't auto-generate if we're in edit mode
+    if (isEditMode) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/projects/serial/next/${assetType}`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            serialInput.value = data.serial_no;
+        }
+    } catch (error) {
+        console.error("Error generating serial number:", error);
+    }
+}
+
 loadProject();

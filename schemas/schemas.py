@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 from typing import Optional
 from datetime import datetime
 
@@ -81,6 +81,21 @@ class ProjectResponse(BaseModel):
     status:      str
 
     model_config = {"from_attributes": True}
+    
+    @computed_field
+    @property
+    def display_id(self) -> str:
+        """Generate display ID in format LAP01, CPU01, etc."""
+        asset_prefixes = {
+            'laptop': 'LAP',
+            'cpu': 'CPU',
+            'router': 'ROU',
+            'switch': 'SWI',
+            'monitor': 'MON',
+            'firewall': 'FIR'
+        }
+        prefix = asset_prefixes.get(self.asset, 'UNK')
+        return f"{prefix}{self.id:02d}"
 
 
 # ─── Audit ───────────────────────────────────────────────────────────────────

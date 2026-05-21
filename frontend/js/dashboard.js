@@ -103,7 +103,7 @@ async function loadProjects() {
 
         table.innerHTML += `
             <tr>
-                <td>${project.id}</td>
+                <td>${project.display_id}</td>
                 <td>${project.asset}</td>
                 <td>${project.serial_no}</td>
                 <td>${project.location || '-'}</td>

@@ -15,11 +15,62 @@ from middleware.auth_middleware import (
     require_role
 )
 from typing import List
+from re import search as regex_search
 
 router = APIRouter(
     prefix="/projects",
     tags=["Projects"]
 )
+
+# ─────────────────────────────────────────────
+# GENERATE SERIAL NUMBER
+# ─────────────────────────────────────────────
+
+@router.get("/serial/next/{asset_type}")
+def get_next_serial_number(
+    asset_type: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Generate the next serial number for a given asset type"""
+    
+    asset_prefixes = {
+        'laptop': 'LAP',
+        'cpu': 'CPU',
+        'router': 'ROU',
+        'switch': 'SWI',
+        'monitor': 'MON',
+        'firewall': 'FIR'
+    }
+    
+    if asset_type not in asset_prefixes:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid asset type"
+        )
+    
+    prefix = asset_prefixes[asset_type]
+    
+    # Query all serial numbers for this asset type
+    projects = db.query(ProjectData).filter(
+        ProjectData.asset == asset_type,
+        ProjectData.is_deleted == False
+    ).all()
+    
+    # Extract the numeric part from existing serial numbers
+    max_number = 0
+    for project in projects:
+        match = regex_search(r'(\d+)$', project.serial_no)
+        if match:
+            number = int(match.group(1))
+            if number > max_number:
+                max_number = number
+    
+    # Generate the next serial number
+    next_number = max_number + 1
+    next_serial = f"{prefix}{next_number:02d}"
+    
+    return {"serial_no": next_serial}
 
 # ─────────────────────────────────────────────
 # CREATE
