@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from routers import auth, projects, users
+from routers import auth, projects, users, analytics
 from database.connection import engine
 from database.models import Base
 import os
@@ -97,7 +97,7 @@ async def add_no_cache_headers(request: Request, call_next):
     response = await call_next(request)
     
     # Prevent caching for all HTML and API responses
-    if request.url.path.endswith('.html') or request.url.path.startswith('/static') or request.url.path.startswith('/projects') or request.url.path.startswith('/auth'):
+    if request.url.path.endswith('.html') or request.url.path.startswith('/static') or request.url.path.startswith('/projects') or request.url.path.startswith('/auth') or request.url.path.startswith('/analytics'):
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
@@ -108,6 +108,7 @@ async def add_no_cache_headers(request: Request, call_next):
 app.include_router(auth.router)
 app.include_router(projects.router)
 app.include_router(users.router)
+app.include_router(analytics.router)
 
 # Serve frontend
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
@@ -115,6 +116,10 @@ app.mount("/static", StaticFiles(directory="frontend"), name="static")
 @app.get("/")
 def serve_frontend():
     return FileResponse("frontend/index.html")
+
+@app.get("/analytics-dashboard")
+def serve_analytics_dashboard():
+    return FileResponse("frontend/analytics-dashboard.html")
 
 @app.get("/health")
 def health_check():

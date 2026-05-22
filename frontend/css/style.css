@@ -223,6 +223,44 @@ tr:hover {
     flex-wrap: wrap;
 }
 
+.action-buttons-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.action-buttons-row input {
+    flex: 1;
+    min-width: 200px;
+    margin: 0;
+}
+
+.action-buttons-row button {
+    padding: 12px 18px;
+    white-space: nowrap;
+}
+
+.btn {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s ease;
+    font-weight: 600;
+    color: white;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    opacity: 0.95;
+}
+
 .secondary-btn {
     background: #334155;
 }
@@ -239,6 +277,35 @@ tr:hover {
 .error-message {
     color: #ef4444;
     margin-top: 14px;
+}
+
+.toast-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    padding: 14px 18px;
+    border-radius: 12px;
+    color: white;
+    background: #334155;
+    box-shadow: 0 14px 35px rgba(0,0,0,0.35);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.25s ease;
+    pointer-events: none;
+}
+
+.toast-message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-message.success {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+}
+
+.toast-message.error {
+    background: linear-gradient(135deg, #dc2626, #991b1b);
 }
 
 @media (max-width: 768px) {

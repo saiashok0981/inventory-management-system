@@ -67,9 +67,35 @@ if (userRole === 'admin' || userRole === 'super-admin') {
     deletedLogsLink.href = '/static/deleted-logs.html?t=' + sessionId;
 }
 
+// Update analytics link visibility for super-admin only
+const analyticsLink = document.getElementById("analyticsLink");
+if (userRole === 'super-admin') {
+    analyticsLink.style.display = "inline";
+    analyticsLink.href = '/analytics-dashboard?t=' + sessionId;
+}
+
 window.addEventListener('pageshow', function(event) {
     validateAndPreventCache();
 });
+
+function showToast(message, type = "success") {
+    let toast = document.getElementById("toastMessage");
+
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "toastMessage";
+        toast.className = "toast-message";
+        document.body.appendChild(toast);
+    }
+
+    toast.textContent = message;
+    toast.className = `toast-message ${type} show`;
+
+    clearTimeout(window.toastTimeout);
+    window.toastTimeout = setTimeout(() => {
+        toast.className = "toast-message";
+    }, 2500);
+}
 
 async function loadProjects() {
 
@@ -157,6 +183,82 @@ function editProject(id) {
 
 function viewHistory(id) {
     window.location.href = `/static/history.html?id=${id}&t=${sessionId}`;
+}
+
+function triggerImport() {
+    document.getElementById("importFileInput").click();
+}
+
+async function handleFileImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/projects/import", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` },
+        body: formData
+    });
+
+    if (response.status === 401) {
+        logout();
+        return;
+    }
+
+    if (!response.ok) {
+        const raw = await response.text();
+        let result = {};
+        try {
+            result = raw ? JSON.parse(raw) : {};
+        } catch (e) {
+            result = { detail: raw };
+        }
+        showToast(result.detail || result.message || "Import failed", "error");
+        event.target.value = "";
+        return;
+    }
+
+    const result = await response.json();
+    const summary = `Imported: ${result.created}, Updated: ${result.updated}, Skipped: ${result.skipped}`;
+    showToast(summary, "success");
+    event.target.value = "";
+    loadProjects();
+}
+
+async function exportAssetsPDF() {
+    const response = await fetch("/projects/export", {
+        headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    if (response.status === 401) {
+        logout();
+        return;
+    }
+
+    if (!response.ok) {
+        const raw = await response.text();
+        let error = {};
+        try {
+            error = raw ? JSON.parse(raw) : {};
+        } catch (e) {
+            error = { detail: raw };
+        }
+        showToast(error.detail || "Export failed", "error");
+        return;
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "asset_logs.pdf";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+    showToast("PDF exported successfully", "success");
 }
 
 async function deleteProject(id) {

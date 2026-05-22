@@ -52,6 +52,7 @@
         <a href="/static/dashboard.html">Dashboard</a>
         <a href="/static/edit.html">Add Item</a>
         <a id="deletedLogsLink" href="/static/deleted-logs.html" style="display:none;">Deleted Logs</a>
+        <a id="analyticsLink" href="/analytics-dashboard" style="display:none;">📊 Analytics</a>
         <a href="#" onclick="logout()">Logout</a>
     </div>
 </div>
@@ -81,13 +82,18 @@
 
         <h1 class="title">Asset Inventory</h1>
 
-        <input
-            type="text"
-            id="searchInput"
-            class="search-bar"
-            placeholder="Search..."
-            onkeyup="filterProjects()"
-        />
+        <div class="action-buttons-row">
+            <input
+                type="text"
+                id="searchInput"
+                class="search-bar"
+                placeholder="Search..."
+                onkeyup="filterProjects()"
+            />
+            <button class="btn btn-primary" onclick="triggerImport()">📥 Import</button>
+            <button class="btn btn-primary" onclick="exportAssetsPDF()">📤 Export PDF</button>
+            <input type="file" id="importFileInput" accept=".csv,.pdf" style="display:none;" onchange="handleFileImport(event)">
+        </div>
 
         <div class="table-wrapper">
             <table>
