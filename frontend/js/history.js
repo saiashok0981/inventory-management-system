@@ -4,49 +4,10 @@ const urlParams = new URLSearchParams(window.location.search);
 let sessionFromUrl = urlParams.get("t");
 const projectId = urlParams.get("id");
 
-function validateAndPreventCache() {
-    if (!token || !sessionId) {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/?t=" + Date.now();
-        return false;
-    }
-    
-    // If sessionId is missing from URL, use the stored one (allows navigation without URL params)
-    if (!sessionFromUrl) {
-        sessionFromUrl = sessionId;
-        // Update URL to include sessionId for consistency
-        window.history.replaceState({}, '', window.location.pathname + '?t=' + sessionId + (projectId ? '&id=' + projectId : ''));
-    }
-    
-    if (sessionFromUrl !== sessionId) {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/?t=" + Date.now();
-        return false;
-    }
-    
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const currentTime = Math.floor(Date.now() / 1000);
-        if (payload.exp < currentTime) {
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.href = "/?t=" + Date.now();
-            return false;
-        }
-    } catch (e) {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/?t=" + Date.now();
-        return false;
-    }
-    return true;
-}
-
-if (!validateAndPreventCache()) {
-    document.documentElement.innerHTML = "";
-    throw new Error("Session invalid");
+// Ensure sessionId is present in URL for consistency
+if (sessionId && !sessionFromUrl) {
+    sessionFromUrl = sessionId;
+    window.history.replaceState({}, '', window.location.pathname + '?t=' + sessionId + (projectId ? '&id=' + projectId : ''));
 }
 
 window.addEventListener('pageshow', function(event) {

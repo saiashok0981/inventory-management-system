@@ -12,49 +12,10 @@ const payload = parseJwt(token);
 const userRole = payload.role;
 const isEditMode = !!projectId;
 
-function validateAndPreventCache() {
-    if (!token || !sessionId) {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/?t=" + Date.now();
-        return false;
-    }
-    
-    // If sessionId is missing from URL, use the stored one (allows navigation without URL params)
-    if (!sessionFromUrl) {
-        sessionFromUrl = sessionId;
-        // Update URL to include sessionId for consistency
-        window.history.replaceState({}, '', window.location.pathname + '?t=' + sessionId + (projectId ? '&id=' + projectId : ''));
-    }
-    
-    if (sessionFromUrl !== sessionId) {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/?t=" + Date.now();
-        return false;
-    }
-    
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const currentTime = Math.floor(Date.now() / 1000);
-        if (payload.exp < currentTime) {
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.href = "/?t=" + Date.now();
-            return false;
-        }
-    } catch (e) {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/?t=" + Date.now();
-        return false;
-    }
-    return true;
-}
-
-if (!validateAndPreventCache()) {
-    document.documentElement.innerHTML = "";
-    throw new Error("Session invalid");
+// Ensure sessionId is present in URL for consistency
+if (sessionId && !sessionFromUrl) {
+    sessionFromUrl = sessionId;
+    window.history.replaceState({}, '', window.location.pathname + '?t=' + sessionId + (projectId ? '&id=' + projectId : ''));
 }
 
 // Only super-admin can edit existing records; all authenticated users can create new ones
@@ -102,13 +63,22 @@ async function loadProject() {
     document.getElementById("model").value         = project.model;
     document.getElementById("network_on").value    = project.network_on;
     document.getElementById("status").value        = project.status;
+    document.getElementById("procurement").value   = project.procurement   || "";
 }
 
 async function saveProject() {
+    const serialNo = document.getElementById("serial_no").value.trim();
+    const message = document.getElementById("message");
+
+    if (!serialNo) {
+        message.className = "error-message";
+        message.innerText = "Serial number is required";
+        return;
+    }
 
     const payload = {
         asset:       document.getElementById("asset").value,
-        serial_no:   document.getElementById("serial_no").value,
+        serial_no:   serialNo,
         location:    document.getElementById("location").value      || null,
         assigned_to: document.getElementById("assigned_to").value   || null,
         room_no:     document.getElementById("room_no").value       || null,
@@ -116,7 +86,8 @@ async function saveProject() {
         asset_owner: document.getElementById("asset_owner").value,
         model:       document.getElementById("model").value,
         network_on:  document.getElementById("network_on").value,
-        status:      document.getElementById("status").value
+        status:      document.getElementById("status").value,
+        procurement: document.getElementById("procurement").value   || null
     };
 
     let response;
@@ -141,8 +112,6 @@ async function saveProject() {
         });
     }
 
-    const message = document.getElementById("message");
-
     if (response.ok) {
         message.className  = "success-message";
         message.innerText  = "Saved successfully";
@@ -153,52 +122,6 @@ async function saveProject() {
         const error       = await response.json();
         message.className = "error-message";
         message.innerText = error.detail || "Operation failed";
-    }
-}
-
-async function generateSerialNumber() {
-    const assetType = document.getElementById("asset").value;
-    const serialInput = document.getElementById("serial_no");
-    
-    // Don't auto-generate if we're in edit mode
-    if (isEditMode) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/projects/serial/next/${assetType}`, {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            serialInput.value = data.serial_no;
-        }
-    } catch (error) {
-        console.error("Error generating serial number:", error);
-    }
-}
-
-async function generateSerialNumber() {
-    const assetType = document.getElementById("asset").value;
-    const serialInput = document.getElementById("serial_no");
-    
-    // Don't auto-generate if we're in edit mode
-    if (isEditMode) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/projects/serial/next/${assetType}`, {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            serialInput.value = data.serial_no;
-        }
-    } catch (error) {
-        console.error("Error generating serial number:", error);
     }
 }
 

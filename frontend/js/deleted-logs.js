@@ -3,49 +3,10 @@ const sessionId = localStorage.getItem("sessionId");
 const urlParams = new URLSearchParams(window.location.search);
 let sessionFromUrl = urlParams.get("t");
 
-function validateAndPreventCache() {
-    if (!token || !sessionId) {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/?t=" + Date.now();
-        return false;
-    }
-    
-    // If sessionId is missing from URL, use the stored one (allows navigation without URL params)
-    if (!sessionFromUrl) {
-        sessionFromUrl = sessionId;
-        // Update URL to include sessionId for consistency
-        window.history.replaceState({}, '', window.location.pathname + '?t=' + sessionId);
-    }
-    
-    if (sessionFromUrl !== sessionId) {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/?t=" + Date.now();
-        return false;
-    }
-    
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const currentTime = Math.floor(Date.now() / 1000);
-        if (payload.exp < currentTime) {
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.href = "/?t=" + Date.now();
-            return false;
-        }
-    } catch (e) {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/?t=" + Date.now();
-        return false;
-    }
-    return true;
-}
-
-if (!validateAndPreventCache()) {
-    document.documentElement.innerHTML = "";
-    throw new Error("Session invalid");
+// Ensure sessionId is present in URL for consistency
+if (sessionId && !sessionFromUrl) {
+    sessionFromUrl = sessionId;
+    window.history.replaceState({}, '', window.location.pathname + '?t=' + sessionId);
 }
 
 let allDeletions = [];
@@ -101,7 +62,7 @@ async function loadDeletionLogs() {
     if (allDeletions.length === 0) {
         table.innerHTML = `
             <tr>
-                <td colspan="10" style="text-align: center; padding: 20px;">
+                <td colspan="14" style="text-align: center; padding: 20px;">
                     No deletion records found
                 </td>
             </tr>
@@ -127,6 +88,7 @@ async function loadDeletionLogs() {
                     </span>
                 </td>
                 <td>${log.status}</td>
+                <td>${log.procurement || '-'}</td>
                 <td>${log.deleted_by}</td>
                 <td>${new Date(log.deleted_at).toLocaleString()}</td>
             </tr>

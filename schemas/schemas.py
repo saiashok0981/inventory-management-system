@@ -1,6 +1,6 @@
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, computed_field, field_validator
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, date
 
 
 # ─── Auth ────────────────────────────────────────────────────────────────────
@@ -49,6 +49,14 @@ class ProjectCreate(BaseModel):
     model:       str
     network_on:  str
     status:      str = "Inuse"
+    procurement: Optional[date] = None
+
+    @field_validator('serial_no')
+    @classmethod
+    def validate_serial_no(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("Serial number is required and cannot be empty")
+        return v.strip()
 
 class ProjectUpdate(BaseModel):
     asset:       Optional[str] = None
@@ -61,6 +69,16 @@ class ProjectUpdate(BaseModel):
     model:       Optional[str] = None
     network_on:  Optional[str] = None
     status:      Optional[str] = None
+    procurement: Optional[date] = None
+
+    @field_validator('serial_no')
+    @classmethod
+    def validate_serial_no(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            if not v.strip():
+                raise ValueError("Serial number cannot be empty")
+            return v.strip()
+        return v
 
 class ProjectResponse(BaseModel):
     id:          int
@@ -79,6 +97,7 @@ class ProjectResponse(BaseModel):
     updated_by:  Optional[int]
     updated_at:  datetime
     status:      str
+    procurement: Optional[date]
 
     model_config = {"from_attributes": True}
     
@@ -127,5 +146,6 @@ class DeletionLogResponse(BaseModel):
     status:      str
     deleted_by:  str
     deleted_at:  datetime
+    procurement: Optional[date]
 
     model_config = {"from_attributes": True}

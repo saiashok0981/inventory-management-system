@@ -8,50 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Deletion Logs - DRDO CABS</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    
-    <script>
-        function validateAndPreventCache() {
-            const token = localStorage.getItem("token");
-            const sessionId = localStorage.getItem("sessionId");
-            const urlParams = new URLSearchParams(window.location.search);
-            const sessionFromUrl = urlParams.get("t");
-            
-            if (!token || !sessionId) {
-                localStorage.clear();
-                sessionStorage.clear();
-                window.location.href = "/?t=" + Date.now();
-                return false;
-            }
-            
-            if (sessionFromUrl !== sessionId) {
-                localStorage.clear();
-                sessionStorage.clear();
-                window.location.href = "/?t=" + Date.now();
-                return false;
-            }
-            
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                const currentTime = Math.floor(Date.now() / 1000);
-                if (payload.exp < currentTime) {
-                    localStorage.clear();
-                    sessionStorage.clear();
-                    window.location.href = "/?t=" + Date.now();
-                    return false;
-                }
-            } catch (e) {
-                localStorage.clear();
-                sessionStorage.clear();
-                window.location.href = "/?t=" + Date.now();
-                return false;
-            }
-            return true;
-        }
-        
-        if (!validateAndPreventCache()) {
-            document.documentElement.innerHTML = "";
-        }
-    </script>
+    <script src="/static/js/auth-check.js"></script>
 </head>
 
 <body>
@@ -99,6 +56,7 @@
                         <th>Model</th>
                         <th>Network</th>
                         <th>Status</th>
+                        <th>Procurement</th>
                         <th>Deleted By</th>
                         <th>Deleted At</th>
                     </tr>

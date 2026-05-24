@@ -5,7 +5,7 @@ import csv
 import re
 from typing import List, Dict, Any
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from database.connection import get_db
 from database.models import User, ProjectData, AuditLog, DeletionLog
 from schemas.schemas import (
@@ -38,6 +38,7 @@ IMPORTABLE_FIELDS = [
     "model",
     "network_on",
     "status",
+    "procurement",
 ]
 
 REQUIRED_IMPORT_FIELDS = [
@@ -68,6 +69,8 @@ HEADER_FIELD_MAP = {
     "networkon": "network_on",
     "network": "network_on",
     "status": "status",
+    "procurement": "procurement",
+    "procurementdate": "procurement",
 }
 
 
@@ -179,6 +182,14 @@ def normalize_import_value(field_name: str, value: Any):
             "condemnd": "condemnd",
         }
         return status_map.get(normalized, text)
+
+    if field_name == "procurement":
+        try:
+            from datetime import date
+            date_part = text.split()[0]
+            return date.fromisoformat(date_part)
+        except Exception:
+            return None
 
     return text
 
@@ -324,6 +335,7 @@ def create_project(
         updated_by  = current_user.id,
         network_on  = data.network_on,
         status      = data.status,
+        procurement = data.procurement,
     )
 
     db.add(project)
@@ -452,6 +464,7 @@ def import_projects(
                 model=row["model"],
                 network_on=row["network_on"],
                 status=row["status"],
+                procurement=row.get("procurement"),
                 created_by=current_user.id,
                 updated_by=current_user.id,
             )
@@ -485,13 +498,15 @@ def export_projects_pdf(
 
     lines = [
         "Asset Logs",
-        "ID  Asset  Serial No  Location  User  Room No  Division  Asset Owner  Model  Network On  Status",
+        "ID  Asset  Serial No  Location  User  Room No  Division  Asset Owner  Model  Network On  Status  Procurement",
     ]
     for project in projects:
+        procurement_val = project.procurement.strftime("%Y-%m-%d") if project.procurement else "-"
         lines.append(
             f"{project.id}  {project.asset}  {project.serial_no}  {project.location or '-'}  "
             f"{project.assigned_to or '-'}  {project.room_no or '-'}  {project.division}  "
-            f"{project.asset_owner}  {project.model}  {project.network_on}  {project.status}"
+            f"{project.asset_owner}  {project.model}  {project.network_on}  {project.status}  "
+            f"{procurement_val}"
         )
 
     buffer = BytesIO(build_simple_pdf(lines))
@@ -552,7 +567,8 @@ def update_project(
         "asset_owner",
         "model",
         "network_on",
-        "status"
+        "status",
+        "procurement"
     ]
 
     for field in tracked_fields:
@@ -614,6 +630,7 @@ def delete_project(
         model=project.model,
         network_on=project.network_on,
         status=project.status,
+        procurement=project.procurement,
         deleted_by=current_user.id
     )
     
@@ -640,7 +657,7 @@ def get_project_history(
             detail="Users cannot view project history"
         )
     
-    logs = db.query(AuditLog).filter(
+    logs = db.query(AuditLog).options(joinedload(AuditLog.changer)).filter(
         AuditLog.table_name == "project_data",
         AuditLog.record_id == project_id
     ).order_by(AuditLog.changed_at.desc()).all()
@@ -649,8 +666,6 @@ def get_project_history(
 
     for log in logs:
 
-        user = db.query(User).filter(User.id == log.changed_by).first()
-
         result.append({
             "id":         log.id,
             "table_name": log.table_name,
@@ -658,7 +673,7 @@ def get_project_history(
             "field_name": log.field_name,
             "old_value":  log.old_value,
             "new_value":  log.new_value,
-            "changed_by": user.username if user else "Unknown",
+            "changed_by": log.changer.username if log.changer else "Unknown",
             "changed_at": log.changed_at
         })
 
@@ -674,12 +689,11 @@ def get_deletion_logs(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_role("admin", "super-admin"))
 ):
-    logs = db.query(DeletionLog).order_by(DeletionLog.deleted_at.desc()).all()
+    logs = db.query(DeletionLog).options(joinedload(DeletionLog.deleter)).order_by(DeletionLog.deleted_at.desc()).all()
 
     result = []
 
     for log in logs:
-        user = db.query(User).filter(User.id == log.deleted_by).first()
 
         result.append({
             "id":          log.id,
@@ -693,7 +707,8 @@ def get_deletion_logs(
             "model":       log.model,
             "network_on":  log.network_on,
             "status":      log.status,
-            "deleted_by":  user.username if user else "Unknown",
+            "procurement": log.procurement,
+            "deleted_by":  log.deleter.username if log.deleter else "Unknown",
             "deleted_at":  log.deleted_at
         })
 

@@ -13,36 +13,7 @@
 
     <link rel="stylesheet"
           href="/static/css/style.css">
-    
-    <script>
-        function validateAndPreventCache() {
-            const token = localStorage.getItem("token");
-            
-            if (!token) {
-                window.location.href = "/?t=" + Date.now();
-                return false;
-            }
-            
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                const currentTime = Math.floor(Date.now() / 1000);
-                if (payload.exp < currentTime) {
-                    localStorage.removeItem("token");
-                    window.location.href = "/?t=" + Date.now();
-                    return false;
-                }
-            } catch (e) {
-                localStorage.removeItem("token");
-                window.location.href = "/?t=" + Date.now();
-                return false;
-            }
-            return true;
-        }
-        
-        if (!validateAndPreventCache()) {
-            document.documentElement.innerHTML = "";
-        }
-    </script>
+    <script src="/static/js/auth-check.js"></script>
 </head>
 
 <body>

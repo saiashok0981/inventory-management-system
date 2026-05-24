@@ -9,36 +9,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Asset Form</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    
-    <script>
-        function validateAndPreventCache() {
-            const token = localStorage.getItem("token");
-            
-            if (!token) {
-                window.location.href = "/?t=" + Date.now();
-                return false;
-            }
-            
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                const currentTime = Math.floor(Date.now() / 1000);
-                if (payload.exp < currentTime) {
-                    localStorage.removeItem("token");
-                    window.location.href = "/?t=" + Date.now();
-                    return false;
-                }
-            } catch (e) {
-                localStorage.removeItem("token");
-                window.location.href = "/?t=" + Date.now();
-                return false;
-            }
-            return true;
-        }
-        
-        if (!validateAndPreventCache()) {
-            document.documentElement.innerHTML = "";
-        }
-    </script>
+    <script src="/static/js/auth-check.js"></script>
 </head>
 
 <body>
@@ -70,11 +41,12 @@
             <option value="firewall">Firewall</option>
         </select>
 
-        <label>Serial No</label>
+        <label>Serial No <span style="color: #ef4444;">*</span></label>
         <input
             type="text"
             id="serial_no"
             placeholder="Enter serial number"
+            required
         >
 
         <label>Location</label>
@@ -132,6 +104,12 @@
             <option value="put-up for condemnd">Put-up for Condemnd</option>
             <option value="condemnd">Condemnd</option>
         </select>
+
+        <label>Procurement Date</label>
+        <input
+            type="date"
+            id="procurement"
+        >
 
         <button onclick="saveProject()">Save</button>
 

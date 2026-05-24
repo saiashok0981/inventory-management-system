@@ -3,43 +3,7 @@ const sessionId = localStorage.getItem("sessionId");
 const urlParams = new URLSearchParams(window.location.search);
 const sessionFromUrl = urlParams.get("t");
 
-function validateAndPreventCache() {
-    if (!token || !sessionId) {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/?t=" + Date.now();
-        return false;
-    }
-    
-    if (sessionFromUrl !== sessionId) {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/?t=" + Date.now();
-        return false;
-    }
-    
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const currentTime = Math.floor(Date.now() / 1000);
-        if (payload.exp < currentTime) {
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.href = "/?t=" + Date.now();
-            return false;
-        }
-    } catch (e) {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/?t=" + Date.now();
-        return false;
-    }
-    return true;
-}
-
-if (!validateAndPreventCache()) {
-    document.documentElement.innerHTML = "";
-    throw new Error("Session invalid");
-}
+// validateAndPreventCache check is executed globally via static/js/auth-check.js
 
 let allProjects = [];
 
@@ -144,6 +108,7 @@ async function loadProjects() {
                     </span>
                 </td>
                 <td>${project.status}</td>
+                <td>${project.procurement || '-'}</td>
                 <td>
                     <div class="action-buttons">
                         ${actionButtons}

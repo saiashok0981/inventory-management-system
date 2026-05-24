@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, Enum, TIMESTAMP, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Boolean, Enum, TIMESTAMP, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database.connection import Base
@@ -38,6 +38,7 @@ class ProjectData(Base):
                 nullable=False,
                 default='Inuse'
               )
+    procurement = Column(Date, nullable=True)
     is_deleted  = Column(Boolean, default=False)
     created_by  = Column(Integer, ForeignKey("users.id"))
     created_at  = Column(TIMESTAMP, server_default=func.now())
@@ -77,6 +78,7 @@ class DeletionLog(Base):
     model       = Column(String(100), nullable=False)
     network_on  = Column(String(50), nullable=False)
     status      = Column(String(50), nullable=False)
+    procurement = Column(Date, nullable=True)
     deleted_by  = Column(Integer, ForeignKey("users.id"))
     deleted_at  = Column(TIMESTAMP, server_default=func.now())
 
